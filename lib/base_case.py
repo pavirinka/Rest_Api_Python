@@ -1,5 +1,5 @@
 import json
-
+from datetime import datetime
 from requests import Response
 
 class BaseCase:
@@ -8,7 +8,7 @@ class BaseCase:
         return response.cookies[cookie_name]
 
     def get_header(self, response: Response, header_name):
-        assert header_name in response.headers, f"Cannot find cookie wiht name '{header_name}' in the last response"
+        assert header_name in response.headers, f"Cannot find header wiht name '{header_name}' in the last response"
         return response.headers[header_name]
 
     def get_json_value(self, response: Response, name):
@@ -20,3 +20,17 @@ class BaseCase:
         assert name in response_as_dict, f"Response json doesn't have key '{name}'"
 
         return response_as_dict[name]
+
+    def prepare_registration_data(self,email=None):
+        if email is None:
+            base_part = "learnqa"
+            domain = "example.com"
+            random_part = datetime.now().strftime("%m%d%Y%H%M%S")
+            email = f"{base_part}{random_part}@{domain}"
+        return{
+            'password': '123',
+            'username': 'learnqa',
+            'firstName': 'learnqa',
+            'lastName': 'learnqa',
+            'email': email
+        }
