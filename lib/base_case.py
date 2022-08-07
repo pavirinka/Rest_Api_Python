@@ -28,7 +28,7 @@ class BaseCase:
             random_part = datetime.now().strftime("%m%d%Y%H%M%S")
             email = f"{base_part}{random_part}@{domain}"
         return{
-            'password': '123',
+            'password': '123g',
             'username': 'learnqa',
             'firstName': 'learnqa',
             'lastName': 'learnqa',

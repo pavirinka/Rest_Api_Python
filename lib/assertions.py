@@ -35,3 +35,12 @@ class Assertions:
 
         for name in names:
             assert name not in response_as_dict, f"Response json shouldn't have key '{name}'. But it's present"
+    @staticmethod
+    def assert_json_has_keys(response: Response, names: list):
+        try:
+            response_as_dict = response.json()
+        except json.JSONDecodeError:
+            assert False, f"Response is not json format. Response text is '{response.text}'"
+
+        for name in names:
+            assert name in response_as_dict, f"Response json shouldn't have key '{name}'. But it's present"
