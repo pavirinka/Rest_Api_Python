@@ -33,44 +33,59 @@ class TestUserDelete(BaseCase):
         auth_sid = self.get_cookie(response1, "auth_sid")
         token = self.get_header(response1, "x-csrf-token")
 
+
         response2 = requests.get(
             "https://playground.learnqa.ru/api/user/2",
             headers={"x-csrf-token": token},
             cookies={"auth_sid": auth_sid}
         )
 
-        unexpected_fields = ["email","firstName","lastName","username"]
-        Assertions.assert_json_has_keys(response2,unexpected_fields)
+        expected_fields = ["email","firstName","lastName","username"]
+        Assertions.assert_json_has_keys(response2,expected_fields)
         # DELETE
-        response3 = requests.delete(f"https://playground.learnqa.ru/api/user/{id}")
+        response3 = requests.delete(
+            f"https://playground.learnqa.ru/api/user/2",
+            headers={"x-csrf-token": token},
+            cookies={"auth_sid": auth_sid})
 
-        Assertions.assert_status_code(response3, 404)
-        assert response3.content.decode("utf-8") == "This is 404 error!\n<a href='/'>Home</a>" , \
+
+        Assertions.assert_status_code(response3, 400)
+        assert response3.content.decode("utf-8") == "Please, do not delete test users with ID 1, 2, 3, 4 or 5.", \
             f"Unexpected response content {response3.content}"
+         #GET_USER
+        response4 = requests.get(
+            f"https://playground.learnqa.ru/api/user/2",
+            headers={"x-csrf-token": token},
+            cookies={"auth_sid": auth_sid}
+        )
+
+        expected_fields = ["email", "firstName", "lastName", "username"]
+        Assertions.assert_json_has_keys(response4, expected_fields)
+
     #создание пользователя, удаление и получение его по id
     def test_delete_just_created_user(self):
-        response4 = requests.post("https://playground.learnqa.ru/api/user/login", data=self.login_data)
+        response5 = requests.post("https://playground.learnqa.ru/api/user/login", data=self.login_data)
 
-        auth_sid = self.get_cookie(response4, "auth_sid")
-        token = self.get_header(response4, "x-csrf-token")
-        user_id_from_auth_method = self.get_json_value(response4, "user_id")
+        auth_sid = self.get_cookie(response5, "auth_sid")
+        token = self.get_header(response5, "x-csrf-token")
+        user_id_from_auth_method = self.get_json_value(response5, "user_id")
         # DELETE
-        response5 = requests.delete(
+        response6 = requests.delete(
             f"https://playground.learnqa.ru/api/user/{user_id_from_auth_method}",
             headers = {"x-csrf-token": token},
             cookies = {"auth_sid": auth_sid}
         )
 
-        Assertions.assert_status_code(response5, 200)
-        # GETgUSER
-        response6 = requests.get(
+        Assertions.assert_status_code(response6, 200)
+        # GET_USER
+        response7 = requests.get(
             f"https://playground.learnqa.ru/api/user/{user_id_from_auth_method}",
             headers={"x-csrf-token": token},
             cookies={"auth_sid": auth_sid}
         )
 
-        assert response6.content.decode("utf-8") == "User not found", \
-            f"Unexpected response content {response6.content}"
+        assert response7.content.decode("utf-8") == "User not found", \
+            f"Unexpected response content {response7.content}"
 
     #удаление пользователя, будучи авторизованными другим пользователем
     def test_delete_user_with_auth_another_user(self):
@@ -79,20 +94,32 @@ class TestUserDelete(BaseCase):
             'email': 'vinkotov@example.com',
             'password': '1234'
         }
-        response7 = requests.post("https://playground.learnqa.ru/api/user/login", data=data)
+        response8 = requests.post("https://playground.learnqa.ru/api/user/login", data=data)
 
-        Assertions.assert_status_code(response7, 200)
-        auth_sid = self.get_cookie(response7, "auth_sid")
-        token = self.get_header(response7, "x-csrf-token")
+
+        Assertions.assert_status_code(response8, 200)
+        auth_sid = self.get_cookie(response8, "auth_sid")
+        token = self.get_header(response8, "x-csrf-token")
+        user_id_from_auth_method = self.get_json_value(response8, "user_id")
 
         # DELETE
-        response8 = requests.delete(
+        response9 = requests.delete(
             f"https://playground.learnqa.ru/api/user/{self.user_id}",
             headers = {"x-csrf-token": token},
             cookies = {"auth_sid": auth_sid}
+
         )
 
-        Assertions.assert_status_code(response8, 400)
-        assert response8.content.decode("utf-8") == "Please, do not delete test users with ID 1, 2, 3, 4 or 5.", \
-              f"Unexpected response content {response8.content}"
+        Assertions.assert_status_code(response9, 400)
+        assert response9.content.decode("utf-8") == "Please, do not delete test users with ID 1, 2, 3, 4 or 5.", \
+              f"Unexpected response content {response9.content}"
 
+        #GET_USER
+        response10 = requests.get(
+            f"https://playground.learnqa.ru/api/user/{user_id_from_auth_method}",
+            headers={"x-csrf-token": token},
+            cookies={"auth_sid": auth_sid}
+        )
+
+        expected_fields = ["email", "firstName", "lastName", "username"]
+        Assertions.assert_json_has_keys(response10, expected_fields)

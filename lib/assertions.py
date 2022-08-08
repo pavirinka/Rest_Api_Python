@@ -43,4 +43,4 @@ class Assertions:
             assert False, f"Response is not json format. Response text is '{response.text}'"
 
         for name in names:
-            assert name in response_as_dict, f"Response json shouldn't have key '{name}'. But it's present"
+            assert name in response_as_dict, f"Response json should have key '{name}'. But it doesn't"
