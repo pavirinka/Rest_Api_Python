@@ -1,11 +1,14 @@
-import requests
+from lib.my_requests import MyRequests
 import pytest
 import json
 from lib.base_case import BaseCase
 from lib.assertions import Assertions
 import random
 import string
+import allure
 
+@allure.epic("Тесты на Регистрацию")
+@allure.severity("BLOCKER")
 class TestUserRegister(BaseCase):
     def test_create_user_with_incorrect_email(self):
         email = 'learnqaexample.com'
@@ -17,12 +20,11 @@ class TestUserRegister(BaseCase):
             'email': email
         }
 
-        response1 =requests.post("https://playground.learnqa.ru/api/user/", data=data)
+        response1 =MyRequests.post("/user/", data=data)
 
         Assertions.assert_status_code(response1, 400)
         assert  response1.content.decode("utf-8") == "Invalid email format",\
             f"Unexpected response content {response1.content}"
-
 
     def test_create_user_with_short_firstName(self):
         firstName = random.choice(string.ascii_letters)
@@ -34,7 +36,8 @@ class TestUserRegister(BaseCase):
             'email': 'learnqa@example.com'
         }
 
-        response2 =requests.post("https://playground.learnqa.ru/api/user/", data=data)
+        response2 =MyRequests.post("/user/", data=data)
+
 
         Assertions.assert_status_code(response2, 400)
         assert  response2.content.decode("utf-8") == "The value of 'firstName' field is too short",\
@@ -51,10 +54,10 @@ class TestUserRegister(BaseCase):
             'email': 'learnqa@example.com'
         }
 
-        response3 =requests.post("https://playground.learnqa.ru/api/user/", data=data)
+        response3 =MyRequests.post("/user/", data=data)
 
         Assertions.assert_status_code(response3, 400)
-        assert  response3.content.decode("utf-8") == "The value of 'firstName' field is too long",\
+        assert response3.content.decode("utf-8") == "The value of 'firstName' field is too long",\
             f"Unexpected response content {response3.content}"
 
     datas = [({
@@ -99,7 +102,7 @@ class TestUserRegister(BaseCase):
     @pytest.mark.parametrize("datas, skipped_param", datas)
     def test_create_user_with_no_parametr(self, datas, skipped_param):
         data = datas
-        response4 = requests.post("https://playground.learnqa.ru/api/user/", data=data)
+        response4 = MyRequests.post("/user/", data=data)
 
         Assertions.assert_status_code(response4, 400)
         assert response4.content.decode("utf-8") == f"The following required params are missed: {skipped_param}",\

@@ -1,12 +1,14 @@
-import requests
+from lib.my_requests import MyRequests
 from lib.base_case import BaseCase
 from lib.assertions import Assertions
+import allure
 
+@allure.epic("Тесты на метод PUT")
 class TestUserEdit(BaseCase):
     #REGISTER
     def setup(self):
         register_data = self.prepare_registration_data()
-        response = requests.post("https://playground.learnqa.ru/api/user/", data=register_data)
+        response = MyRequests.post("/user/", data=register_data)
 
         Assertions.assert_status_code(response, 200)
         Assertions.assert_json_has_key(response, "id")
@@ -25,8 +27,8 @@ class TestUserEdit(BaseCase):
     # изменение данных пользователя, будучи неавторизованными
     def test_edit_just_created_user_without_auth(self):
     #EDIT
-        response3 = requests.put(
-            f"https://playground.learnqa.ru/api/user/{self.user_id}",
+        response3 = MyRequests.put(
+            f"/user/{self.user_id}",
             data = {"firstName": self.new_name}
         )
 
@@ -38,15 +40,15 @@ class TestUserEdit(BaseCase):
     #изменение данных пользователя, будучи авторизованными другим пользователем
     #LOGIN
 
-        response2 = requests.post("https://playground.learnqa.ru/api/user/login", data=self.login_data)
+        response2 = MyRequests.post("/user/login", data=self.login_data)
         Assertions.assert_status_code(response2, 200)
         auth_sid = self.get_cookie(response2, "auth_sid")
         token = self.get_header(response2, "x-csrf-token")
 
 
 
-        response4 = requests.put(
-            "https://playground.learnqa.ru/api/user/40439",
+        response4 = MyRequests.put(
+            "/user/40439",
             headers={"x-csrf-token": token},
             cookies={"auth_sid": auth_sid},
             data={"username": self.new_name}
@@ -54,8 +56,8 @@ class TestUserEdit(BaseCase):
 
 
         #Assertions.assert_status_code(response4, 200)
-        response5 = requests.get(
-            "https://playground.learnqa.ru/api/user/40439",
+        response5 = MyRequests.get(
+            "/user/40439",
             headers={"x-csrf-token": token},
             cookies={"auth_sid": auth_sid}
             )
@@ -63,22 +65,15 @@ class TestUserEdit(BaseCase):
             f"Unexpected response content {response2.content}"
 
     def test_edit_email_just_created_user_with_user_auth(self):
-    # изменение email пользователя, будучи авторизованными тем же пользователем, на новый email без символа @
-    # REGISTRATE
-        #register_data = self.prepare_registration_data()
-        #response6 = requests.post("https://playground.learnqa.ru/api/user/", data= register_data)
-
-        #Assertions.assert_status_code(response6, 200)
-        #Assertions.assert_json_has_key(response6, "id")
     #LOGIN
-        response7 = requests.post("https://playground.learnqa.ru/api/user/login", data=self.login_data)
+        response7 = MyRequests.post("/user/login", data=self.login_data)
 
         Assertions.assert_status_code(response7, 200)
         self.auth_sid = self.get_cookie(response7, "auth_sid")
         self.token = self.get_header(response7, "x-csrf-token")
     #EDIT
-        response8 = requests.put(
-            f"https://playground.learnqa.ru/api/user/{self.user_id}",
+        response8 = MyRequests.put(
+            f"/user/{self.user_id}",
 
             headers={"x-csrf-token": self.token},
             cookies={"auth_sid": self.auth_sid},
@@ -92,15 +87,15 @@ class TestUserEdit(BaseCase):
    #изменнение firstName пользователя, будучи авторизованными тем же пользователем, на очень короткое значение в один символ
     def test_edit_short_firstName_just_created_user_with_user_auth(self):
     #LOGIN
-        response9 = requests.post("https://playground.learnqa.ru/api/user/login", data=self.login_data)
+        response9 = MyRequests.post("/user/login", data=self.login_data)
 
         Assertions.assert_status_code(response9, 200)
         self.auth_sid = self.get_cookie(response9, "auth_sid")
         self.token = self.get_header(response9, "x-csrf-token")
 
     #EDIT
-        response10 = requests.put(
-            f"https://playground.learnqa.ru/api/user/{self.user_id}",
+        response10 = MyRequests.put(
+            f"/user/{self.user_id}",
 
             headers={"x-csrf-token": self.token},
             cookies={"auth_sid": self.auth_sid},
